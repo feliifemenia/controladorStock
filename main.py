@@ -180,16 +180,91 @@ def modificar_stock():
     entry_cantidad.grid(row=1, column=1)
     button_agregar.grid(row=3, column=1)
 
+
+
+def actualizar_stock_productos(lista_productos):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    for codigo, cantidad in lista_productos:
+        print(f"Procesando producto: {codigo} con cantidad: {cantidad}")
+        sql_select = "SELECT cantidad FROM infoProductos WHERE codigo = %s"
+        val = (codigo,)
+        cursor.execute(sql_select, val)
+        resultado = cursor.fetchone()
+
+        if resultado:
+            cantidad_actual = resultado[0]
+            nueva_cantidad = cantidad_actual - cantidad
+
+            # Actualizar la cantidad del producto en la base de datos
+            sql_update = "UPDATE infoProductos SET cantidad = %s WHERE codigo = %s"
+            val_update = (nueva_cantidad, codigo)
+            cursor.execute(sql_update, val_update)
+            conexion.commit()
+        else:
+            messagebox.showwarning("Advertencia", f"No se encontró ningún producto con el código: {codigo}")
+
+    cursor.close()
+    conexion.close()
+
+def ventana_modificar_stock_multiple():
+    window_modificar_stock = Toplevel(root)
+    window_modificar_stock.title("Modificar Stock Múltiple")
+
+    label_codigo = Label(window_modificar_stock, text="Ingrese el código de Producto")
+    entry_codigo = Entry(window_modificar_stock, width=100)
+
+    label_cantidad = Label(window_modificar_stock, text="Ingrese la Cantidad a dar de Baja")
+    entry_cantidad = Entry(window_modificar_stock, width=100)
+    entry_cantidad.insert(0, '1')
+
+    productos = []
+
+    def agregar_producto():
+        codigo = entry_codigo.get()
+        try:
+            cantidad = int(entry_cantidad.get())
+            if cantidad < 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showwarning("Advertencia", "Ingrese una cantidad mayor a 0")
+            return
+
+        productos.append((codigo, cantidad))
+        entry_codigo.delete(0, END)
+        entry_cantidad.delete(0, END)
+
+    def finalizar():
+        if productos:
+            actualizar_stock_productos(productos)
+            messagebox.showinfo("Información", "Stock actualizado para los productos ingresados")
+        else:
+            messagebox.showinfo("Información", "No se ingresaron productos para actualizar")
+        window_modificar_stock.destroy()
+
+    button_agregar = Button(window_modificar_stock, text="Agregar Producto", command=agregar_producto)
+    button_finalizar = Button(window_modificar_stock, text="Finalizar", command=finalizar)
+
+    label_codigo.grid(row=0, column=0)
+    entry_codigo.grid(row=0, column=1)
+    label_cantidad.grid(row=1, column=0)
+    entry_cantidad.grid(row=1, column=1)
+    button_agregar.grid(row=2, column=0)
+    button_finalizar.grid(row=2, column=1)
+
 root.title("Manejador de Stock")
 
 button_cargar_producto = Button(root, text="Cargar nuevo producto", command=cargar_nuevo_producto)
 button_eliminar_producto = Button(root, text="Eliminar producto", command=eliminar_producto)
 button_consultar_stock = Button(root, text="Consultar Stock de Producto", command=consultar_stock)
 button_cambiar_cantidades = Button(root, text="Agregar Stock", command=modificar_stock)
+button_cargar_pedido = Button(root, text="Cargar Pedido", command=ventana_modificar_stock_multiple)
 
 button_cargar_producto.grid(row=2, column=2)
 button_eliminar_producto.grid(row=3, column=3)
 button_consultar_stock.grid(row=2, column=3)
 button_cambiar_cantidades.grid(row=3, column=2)
+button_cargar_pedido.grid(row=2, column=4)
 
 root.mainloop()
