@@ -1,8 +1,11 @@
 from tkinter import *
 import pymysql
 from tkinter import messagebox
+from ttkbootstrap import Style
+from ttkbootstrap.widgets import Button
 
 root = Tk()
+style = Style(theme='superhero')
 
 def conectar_db():
     return pymysql.connect(
@@ -254,17 +257,29 @@ def ventana_modificar_stock_multiple():
     button_finalizar.grid(row=2, column=1)
 
 root.title("Manejador de Stock")
+#root.attributes('-fullscreen', True)
+root.state('zoomed')
+# Crear un marco para los botones
+frame = Frame(root)
+frame.pack(expand=True, fill='both', padx=20, pady=20)
 
-button_cargar_producto = Button(root, text="Cargar nuevo producto", command=cargar_nuevo_producto)
-button_eliminar_producto = Button(root, text="Eliminar producto", command=eliminar_producto)
-button_consultar_stock = Button(root, text="Consultar Stock de Producto", command=consultar_stock)
-button_cambiar_cantidades = Button(root, text="Agregar Stock", command=modificar_stock)
-button_cargar_pedido = Button(root, text="Cargar Pedido", command=ventana_modificar_stock_multiple)
+button_cargar_producto = Button(frame, text="Cargar nuevo producto", command=cargar_nuevo_producto)
+button_eliminar_producto = Button(frame, text="Eliminar producto", command=eliminar_producto)
+button_consultar_stock = Button(frame, text="Consultar Stock de Producto", command=consultar_stock)
+button_cambiar_cantidades = Button(frame, text="Agregar Stock", command=modificar_stock)
+button_cargar_pedido = Button(frame, text="Cargar Pedido", command=ventana_modificar_stock_multiple)
 
-button_cargar_producto.grid(row=2, column=2)
-button_eliminar_producto.grid(row=3, column=3)
-button_consultar_stock.grid(row=2, column=3)
-button_cambiar_cantidades.grid(row=3, column=2)
-button_cargar_pedido.grid(row=2, column=4)
+# Organiza los botones dentro del marco usando grid
+button_cargar_producto.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+button_eliminar_producto.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
+button_consultar_stock.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+button_cambiar_cantidades.grid(row=1, column=1, sticky='nsew', padx=10, pady=10)
+button_cargar_pedido.grid(row=2, column=0, columnspan=2, sticky='nsew', padx=10, pady=10)
+
+# Configura las filas y columnas para que se expandan
+for i in range(3):
+    frame.grid_rowconfigure(i, weight=1)
+for i in range(2):
+    frame.grid_columnconfigure(i, weight=1)
 
 root.mainloop()
