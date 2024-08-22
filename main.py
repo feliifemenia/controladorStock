@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 import pymysql
 from tkinter import messagebox
 from ttkbootstrap import Style
@@ -30,16 +31,22 @@ def guardar_producto(nombre, codigo, descripcion):
     messagebox.showinfo("Información", "Producto guardado exitosamente")
 
 def cargar_nuevo_producto():
-    window_cargar_producto =Toplevel(root)
+    window_cargar_producto = Toplevel(root)
     window_cargar_producto.title("Cargar Nuevo Producto")
+    window_cargar_producto.geometry("500x250")
 
-    label_nombre = Label(window_cargar_producto, text="Nombre")
-    label_codigo = Label(window_cargar_producto, text="Código")
-    label_descripcion = Label(window_cargar_producto, text="Descripción")
+    # Frame para contener el formulario
+    frame_formulario = ttk.Frame(window_cargar_producto, padding=(20, 10, 20, 10))
+    frame_formulario.grid(row=0, column=0, sticky="ew")
+    
+    # Widgets de entrada
+    label_nombre = ttk.Label(frame_formulario, text="Nombre:")
+    label_codigo = ttk.Label(frame_formulario, text="Código:")
+    label_descripcion = ttk.Label(frame_formulario, text="Descripción:")
 
-    entry_nombre = Entry(window_cargar_producto, width=100)
-    entry_codigo = Entry(window_cargar_producto, width=100)
-    entry_descripcion = Entry(window_cargar_producto, width=100)
+    entry_nombre = ttk.Entry(frame_formulario, width=50)
+    entry_codigo = ttk.Entry(frame_formulario, width=50)
+    entry_descripcion = ttk.Entry(frame_formulario, width=50)
 
     def guardar_datos():
         nombre = entry_nombre.get()
@@ -47,15 +54,20 @@ def cargar_nuevo_producto():
         descripcion = entry_descripcion.get()
         guardar_producto(nombre, codigo, descripcion)
 
-    button_guardar = Button(window_cargar_producto, text="Guardar", command=guardar_datos)
+    # Botón de guardar
+    button_guardar = Button(frame_formulario, text="Guardar", command=guardar_datos)
 
-    label_nombre.grid(row=0, column=0)
-    entry_nombre.grid(row=0, column=1)
-    label_codigo.grid(row=1, column=0)
-    entry_codigo.grid(row=1, column=1)
-    label_descripcion.grid(row=2, column=0)
-    entry_descripcion.grid(row=2, column=1)
-    button_guardar.grid(row=3, column=1)
+    # Posicionamiento de los widgets con padding
+    label_nombre.grid(row=0, column=0, pady=5, sticky="w")
+    entry_nombre.grid(row=0, column=1, pady=5, sticky="ew")
+    label_codigo.grid(row=1, column=0, pady=5, sticky="w")
+    entry_codigo.grid(row=1, column=1, pady=5, sticky="ew")
+    label_descripcion.grid(row=2, column=0, pady=5, sticky="w")
+    entry_descripcion.grid(row=2, column=1, pady=5, sticky="ew")
+    button_guardar.grid(row=3, column=1, pady=10)
+
+    # Expansión automática
+    frame_formulario.columnconfigure(1, weight=1)
 
 def eliminar_producto_db(codigo):
     conexion = conectar_db()
@@ -74,21 +86,35 @@ def eliminar_producto_db(codigo):
 
 def eliminar_producto():
 
-    window_eliminar_producto=Toplevel(root)
+    window_eliminar_producto = Toplevel(root)
     window_eliminar_producto.title("Eliminar un Producto")
+    window_eliminar_producto.geometry("600x150")
 
-    label_codigo = Label(window_eliminar_producto, text="Ingrese el Codigo del Producto que quiere eliminar")
-    entry_codigo = Entry(window_eliminar_producto, width=100)
+    # Frame para contener el formulario
+    frame_formulario = ttk.Frame(window_eliminar_producto, padding=(20, 10, 20, 10))
+    frame_formulario.grid(row=0, column=0, sticky="ew")
+    
+    # Widgets de entrada
+    label_codigo = ttk.Label(frame_formulario, text="Ingrese el Código del Producto a eliminar:")
+    entry_codigo = ttk.Entry(frame_formulario, width=30)
 
     def borrar_datos():
         codigo = entry_codigo.get()
-        eliminar_producto_db(codigo)
+        if codigo:
+            eliminar_producto_db(codigo)
+        else:
+            messagebox.showerror("Error", "Debe ingresar un código para eliminar")
 
-    button_guardar = Button(window_eliminar_producto, text="Borrar", command=borrar_datos)
-    button_guardar.grid(row=3, column=1)
+    # Botón de borrar
+    button_borrar = Button(frame_formulario, text="Borrar", command=borrar_datos, bootstyle="danger")
 
-    label_codigo.grid(row=0, column=0)
-    entry_codigo.grid(row=0, column=1)
+    # Posicionamiento de los widgets con padding
+    label_codigo.grid(row=0, column=0, pady=10, sticky="w")
+    entry_codigo.grid(row=0, column=1, pady=10, sticky="ew")
+    button_borrar.grid(row=1, column=1, pady=10, sticky="e")
+
+    # Expansión automática
+    frame_formulario.columnconfigure(1, weight=1)
 
 def consultar_db(codigo):
     conexion = conectar_db()
@@ -107,13 +133,19 @@ def consultar_db(codigo):
 
 def consultar_stock():
     
-    window_consultar_producto=Toplevel(root)
+    window_consultar_producto = Toplevel(root)
     window_consultar_producto.title("Consultar Stock")
+    window_consultar_producto.geometry("600x150")
 
-    label_codigo = Label(window_consultar_producto, text="Ingrese el codigo de Producto a consultar")
-    entry_codigo = Entry(window_consultar_producto, width=100)
+    # Frame para contener el formulario
+    frame_formulario = ttk.Frame(window_consultar_producto, padding=(20, 10, 20, 10))
+    frame_formulario.grid(row=0, column=0, sticky="ew")
 
-    def consultar_producto():
+    # Widgets de entrada
+    label_codigo = ttk.Label(frame_formulario, text="Ingrese el código del Producto a consultar:")
+    entry_codigo = ttk.Entry(frame_formulario, width=30)
+
+    def realizar_consulta():
         codigo = entry_codigo.get()
         cantidad_producto = consultar_db(codigo)
         if cantidad_producto is not None:
@@ -121,11 +153,16 @@ def consultar_stock():
         else:
             messagebox.showwarning("Advertencia", "No se encontró ningún producto con ese código")
 
-    button_consultar = Button(window_consultar_producto, text="Consultar", command=consultar_producto)
-    
-    label_codigo.grid(row=0, column=0)
-    entry_codigo.grid(row=0, column=1)
-    button_consultar.grid(row=3, column=1)
+    # Botón de consultar
+    button_consultar = Button(frame_formulario, text="Consultar", command=realizar_consulta, bootstyle="primary")
+
+    # Posicionamiento de los widgets con padding
+    label_codigo.grid(row=0, column=0, pady=10, sticky="w")
+    entry_codigo.grid(row=0, column=1, pady=10, sticky="ew")
+    button_consultar.grid(row=1, column=1, pady=10, sticky="e")
+
+    # Expansión automática
+    frame_formulario.columnconfigure(1, weight=1)
 
 def agregar_db(codigo, cantidad):
     conexion = conectar_db()
@@ -214,12 +251,18 @@ def actualizar_stock_productos(lista_productos):
 def ventana_modificar_stock_multiple():
     window_modificar_stock = Toplevel(root)
     window_modificar_stock.title("Modificar Stock Múltiple")
+    window_modificar_stock.geometry("500x300")
 
-    label_codigo = Label(window_modificar_stock, text="Ingrese el código de Producto")
-    entry_codigo = Entry(window_modificar_stock, width=100)
+    # Frame para contener el formulario
+    frame_formulario = ttk.Frame(window_modificar_stock, padding=(20, 10, 20, 10))
+    frame_formulario.grid(row=0, column=0, sticky="ew")
 
-    label_cantidad = Label(window_modificar_stock, text="Ingrese la Cantidad a dar de Baja")
-    entry_cantidad = Entry(window_modificar_stock, width=100)
+    # Widgets de entrada
+    label_codigo = ttk.Label(frame_formulario, text="Ingrese el código de Producto:")
+    entry_codigo = ttk.Entry(frame_formulario, width=30)
+
+    label_cantidad = ttk.Label(frame_formulario, text="Ingrese la Cantidad a dar de Baja:")
+    entry_cantidad = ttk.Entry(frame_formulario, width=30)
     entry_cantidad.insert(0, '1')
 
     productos = []
@@ -228,7 +271,7 @@ def ventana_modificar_stock_multiple():
         codigo = entry_codigo.get()
         try:
             cantidad = int(entry_cantidad.get())
-            if cantidad < 0:
+            if cantidad <= 0:
                 raise ValueError
         except ValueError:
             messagebox.showwarning("Advertencia", "Ingrese una cantidad mayor a 0")
@@ -246,15 +289,20 @@ def ventana_modificar_stock_multiple():
             messagebox.showinfo("Información", "No se ingresaron productos para actualizar")
         window_modificar_stock.destroy()
 
-    button_agregar = Button(window_modificar_stock, text="Agregar Producto", command=agregar_producto)
-    button_finalizar = Button(window_modificar_stock, text="Finalizar", command=finalizar)
+    # Botones
+    button_agregar = Button(frame_formulario, text="Agregar Producto", command=agregar_producto, bootstyle="primary")
+    button_finalizar = Button(frame_formulario, text="Finalizar", command=finalizar, bootstyle="success")
 
-    label_codigo.grid(row=0, column=0)
-    entry_codigo.grid(row=0, column=1)
-    label_cantidad.grid(row=1, column=0)
-    entry_cantidad.grid(row=1, column=1)
-    button_agregar.grid(row=2, column=0)
-    button_finalizar.grid(row=2, column=1)
+    # Posicionamiento de los widgets con padding
+    label_codigo.grid(row=0, column=0, pady=10, sticky="w")
+    entry_codigo.grid(row=0, column=1, pady=10, sticky="ew")
+    label_cantidad.grid(row=1, column=0, pady=10, sticky="w")
+    entry_cantidad.grid(row=1, column=1, pady=10, sticky="ew")
+    button_agregar.grid(row=2, column=1, pady=10, sticky="e")
+    button_finalizar.grid(row=3, column=1, pady=10, sticky="e")
+
+    # Expansión automática
+    frame_formulario.columnconfigure(1, weight=1)
 
 root.title("Manejador de Stock")
 #root.attributes('-fullscreen', True)
