@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/cargarProducto.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Cargar un Nuevo Producto</h2>
+        <form>
+            <label for="nombre">Nombre del Producto</label>
+            <input type="text" id="nombre-producto" name="nombre" placeholder="Ingrese el nombre del producto" required>
+
+            <label for="descripcion">Descripción del Producto</label>
+            <textarea id="descripcion-producto" name="descripcion" rows="4" placeholder="Ingrese la descripción del producto" required></textarea>
+
+            <label for="codigo">Código del Producto</label>
+            <input type="text" id="codigo-producto" name="codigo" placeholder="Ingrese el código del producto" required>
+
+            <label for="cantidad">Cantidad</label>
+            <input type="number" id="cantidad-producto" name="cantidad" placeholder="Ingrese la cantidad disponible" required>
+
+            <label for="codigo-unidad">Código Unidad Base</label>
+            <input type="text" id="codigo-unidad" name="codigo_unidad" placeholder="Ingrese el código de la unidad base" required>
+
+            <label for="cantidad-unidad">Cantidad Unidad</label>
+            <input type="number" id="cantidad-unidad" name="cantidad_unidad" placeholder="Ingrese la cantidad de la unidad base" required>
+
+            <button id="button-cargar-producto" type="submit">Enviar Producto</button>
+        </form>
+    </div>
+    <script src="../scripts/cargarProducto.js"></script>
+</body>
+</html>

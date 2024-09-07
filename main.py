@@ -16,12 +16,12 @@ def conectar_db():
         database="stock"
     )
 
-def guardar_producto(nombre, codigo, descripcion):
+def guardar_producto(nombre, codigo, descripcion, codigo_asociado, cantidad_muestra):
     conexion = conectar_db()
     cursor = conexion.cursor()
 
-    sql = "INSERT INTO infoProductos (nombre, codigo, descripcion) VALUES (%s, %s, %s)"
-    val = (nombre, codigo, descripcion)
+    sql = "INSERT INTO infoProductos (nombre, codigo, descripcion, codigounidad, cantidadmuestra) VALUES (%s, %s, %s, %s, %s)"
+    val = (nombre, codigo, descripcion, codigo_asociado, cantidad_muestra)
     cursor.execute(sql, val)
     conexion.commit()
 
@@ -43,16 +43,23 @@ def cargar_nuevo_producto():
     label_nombre = ttk.Label(frame_formulario, text="Nombre:")
     label_codigo = ttk.Label(frame_formulario, text="Código:")
     label_descripcion = ttk.Label(frame_formulario, text="Descripción:")
+    label_codigo_unidad = ttk.Label(frame_formulario, text="Codigo Unidad Asociado:")
+    label_cantidad_muestra = ttk.Label(frame_formulario, text="Cantidad por Paquete:")
 
     entry_nombre = ttk.Entry(frame_formulario, width=50)
     entry_codigo = ttk.Entry(frame_formulario, width=50)
     entry_descripcion = ttk.Entry(frame_formulario, width=50)
+    entry_codigo_unidad = ttk.Entry(frame_formulario, width=50)
+    entry_cantidad_muestra = ttk.Entry(frame_formulario, width=50)
 
     def guardar_datos():
         nombre = entry_nombre.get()
         codigo = entry_codigo.get()
         descripcion = entry_descripcion.get()
-        guardar_producto(nombre, codigo, descripcion)
+        codigo_asociado = entry_codigo_unidad.get()
+        cantidad_muestra = entry_cantidad_muestra.get()
+        guardar_producto(nombre, codigo, descripcion, codigo_asociado, cantidad_muestra)
+        window_cargar_producto.destroy()
 
     # Botón de guardar
     button_guardar = Button(frame_formulario, text="Guardar", command=guardar_datos)
@@ -64,7 +71,11 @@ def cargar_nuevo_producto():
     entry_codigo.grid(row=1, column=1, pady=5, sticky="ew")
     label_descripcion.grid(row=2, column=0, pady=5, sticky="w")
     entry_descripcion.grid(row=2, column=1, pady=5, sticky="ew")
-    button_guardar.grid(row=3, column=1, pady=10)
+    label_codigo_unidad.grid(row=3, column=0, pady=5, sticky="w")
+    entry_codigo_unidad.grid(row=3, column=1, pady=5, sticky="ew")
+    label_cantidad_muestra.grid(row=4, column=0, pady=5, sticky="w")
+    entry_cantidad_muestra.grid(row=4, column=1, pady=5, sticky="ew")
+    button_guardar.grid(row=5, column=1, pady=10)
 
     # Expansión automática
     frame_formulario.columnconfigure(1, weight=1)
@@ -102,6 +113,7 @@ def eliminar_producto():
         codigo = entry_codigo.get()
         if codigo:
             eliminar_producto_db(codigo)
+            window_eliminar_producto.destroy()
         else:
             messagebox.showerror("Error", "Debe ingresar un código para eliminar")
 
@@ -120,7 +132,7 @@ def consultar_db(codigo):
     conexion = conectar_db()
     cursor = conexion.cursor()
 
-    sql = "SELECT cantidad FROM infoProductos WHERE codigo = %s"
+    sql = "SELECT cantidad, nombre FROM infoProductos WHERE codigo = %s"
     val = (codigo,)
 
     cursor.execute(sql, val)
@@ -129,7 +141,7 @@ def consultar_db(codigo):
     cursor.close()
     conexion.close()
     
-    return resultado[0]
+    return resultado
 
 def consultar_stock():
     
@@ -147,9 +159,11 @@ def consultar_stock():
 
     def realizar_consulta():
         codigo = entry_codigo.get()
-        cantidad_producto = consultar_db(codigo)
+        resultado_query = consultar_db(codigo)
+        cantidad_producto = resultado_query[0]
+        nombre = resultado_query[1]
         if cantidad_producto is not None:
-            messagebox.showinfo("Información", f"La cantidad del producto con código {codigo} es: {cantidad_producto}")
+            messagebox.showinfo("Información", f"La cantidad del producto {nombre} es: {cantidad_producto}")
         else:
             messagebox.showwarning("Advertencia", "No se encontró ningún producto con ese código")
 
@@ -168,38 +182,64 @@ def agregar_db(codigo, cantidad):
     conexion = conectar_db()
     cursor = conexion.cursor()
 
-    sql_select = "SELECT cantidad FROM infoProductos WHERE codigo = %s"
+    sql_select = "SELECT cantidad, codigounidad, cantidadmuestra, nombre FROM infoProductos WHERE codigo = %s"
     val = (codigo,)
     cursor.execute(sql_select, val)
     resultado = cursor.fetchone()
 
     if resultado:
         cantidad_actual = resultado[0]
+        codigo_unidad = resultado[1]
+        cantidad_muestra = resultado[2]
+        nombre_producto = resultado[3]
+
+        #Actualizar la cantidad total del producto, por unidad en la base de datos (cantidad total de unidades)
+
+        sql_select_unidad = "SELECT cantidad FROM infoProductos WHERE codigo = %s"
+        val_unidad = (codigo_unidad,)
+        cursor.execute(sql_select_unidad, val_unidad)
+        resultado_unidad = cursor.fetchone()
+
+        cantidad_unidad = resultado_unidad[0]
+        nueva_cantidad_unidad = cantidad_unidad + (cantidad * cantidad_muestra)
+
+        sql_update_unidad = "UPDATE infoProductos SET cantidad = %s WHERE codigo = %s"
+        val_update_unidad = (nueva_cantidad_unidad, codigo_unidad)
+
+        cursor.execute(sql_update_unidad, val_update_unidad)
+
+        # Actualizar la cantidad de muestras de ese producto en la base de datos (cantidad total de paquetes)
+
         nueva_cantidad = cantidad_actual + cantidad
 
-        # Actualizar la cantidad del producto en la base de datos
         sql_update = "UPDATE infoProductos SET cantidad = %s WHERE codigo = %s"
         val_update = (nueva_cantidad, codigo)
         cursor.execute(sql_update, val_update)
+
         conexion.commit()
 
-        messagebox.showinfo("Información", f"Cantidad actualizada: {nueva_cantidad}")
+        messagebox.showinfo("Información", f"Cantidad actualizada de {nombre_producto}: {nueva_cantidad}")
     else:
         messagebox.showwarning("Advertencia", "No se encontró ningún producto con ese código")
 
     cursor.close()
     conexion.close()
     
-
 def modificar_stock():
-    window_modificar_stock=Toplevel(root)
+    window_modificar_stock = Toplevel(root)
     window_modificar_stock.title("Modificar Stock")
+    window_modificar_stock.geometry("400x200")
 
-    label_codigo = Label(window_modificar_stock, text="Ingrese el codigo de Producto")
-    entry_codigo = Entry(window_modificar_stock, width=100)
+    # Frame para contener el formulario
+    frame_formulario = ttk.Frame(window_modificar_stock, padding=(20, 10, 20, 10))
+    frame_formulario.grid(row=0, column=0, sticky="ew")
 
-    label_cantidad = Label(window_modificar_stock, text="Ingrese la Cantidad a Agregar")
-    entry_cantidad =  Entry(window_modificar_stock, width=100)
+    # Widgets de entrada
+    label_codigo = ttk.Label(frame_formulario, text="Ingrese el código de Producto:")
+    entry_codigo = ttk.Entry(frame_formulario, width=30)
+
+    label_cantidad = ttk.Label(frame_formulario, text="Ingrese la Cantidad a Agregar:")
+    entry_cantidad = ttk.Entry(frame_formulario, width=30)
 
     def agregar_cantidad():
         codigo = entry_codigo.get()
@@ -212,15 +252,17 @@ def modificar_stock():
 
         agregar_db(codigo, cantidad)
 
-    button_agregar = Button(window_modificar_stock, text="Agregar Unidades", command=agregar_cantidad)
+    button_agregar = Button(frame_formulario, text="Agregar Unidades", command=agregar_cantidad, bootstyle="primary")
 
-    label_codigo.grid(row=0, column=0)
-    entry_codigo.grid(row=0, column=1)
-    label_cantidad.grid(row=1, column=0)
-    entry_cantidad.grid(row=1, column=1)
-    button_agregar.grid(row=3, column=1)
+    # Posicionamiento de los widgets con padding
+    label_codigo.grid(row=0, column=0, pady=10, sticky="w")
+    entry_codigo.grid(row=0, column=1, pady=10, sticky="ew")
+    label_cantidad.grid(row=1, column=0, pady=10, sticky="w")
+    entry_cantidad.grid(row=1, column=1, pady=10, sticky="ew")
+    button_agregar.grid(row=2, column=1, pady=10, sticky="e")
 
-
+    # Expansión automática
+    frame_formulario.columnconfigure(1, weight=1)
 
 def actualizar_stock_productos(lista_productos):
     conexion = conectar_db()
@@ -228,19 +270,38 @@ def actualizar_stock_productos(lista_productos):
 
     for codigo, cantidad in lista_productos:
         print(f"Procesando producto: {codigo} con cantidad: {cantidad}")
-        sql_select = "SELECT cantidad FROM infoProductos WHERE codigo = %s"
+        sql_select = "SELECT cantidad, codigounidad, cantidadmuestra FROM infoProductos WHERE codigo = %s"
         val = (codigo,)
         cursor.execute(sql_select, val)
         resultado = cursor.fetchone()
 
         if resultado:
             cantidad_actual = resultado[0]
-            nueva_cantidad = cantidad_actual - cantidad
+            codigo_unidad = resultado[1]
+            cantidad_muestra = resultado[2]
+
+            #Actualizar la cantidad de unidades en la base de datos (cantidad total de unidades)
+
+            sql_select_unidad = "SELECT cantidad FROM infoProductos WHERE codigo = %s"
+            val_unidad = (codigo_unidad,)
+            cursor.execute(sql_select_unidad, val_unidad)
+            resultado_unidad = cursor.fetchone()
+
+            cantidad_unidad = resultado_unidad[0]
+            nueva_cantidad_unidad = cantidad_unidad - (cantidad * cantidad_muestra)
+
+            sql_update_unidad = "UPDATE infoProductos SET cantidad = %s WHERE codigo = %s"
+            val_update_unidad = (nueva_cantidad_unidad, codigo_unidad)
+
+            cursor.execute(sql_update_unidad, val_update_unidad)
 
             # Actualizar la cantidad del producto en la base de datos
+            nueva_cantidad = cantidad_actual - cantidad
+
             sql_update = "UPDATE infoProductos SET cantidad = %s WHERE codigo = %s"
             val_update = (nueva_cantidad, codigo)
             cursor.execute(sql_update, val_update)
+
             conexion.commit()
         else:
             messagebox.showwarning("Advertencia", f"No se encontró ningún producto con el código: {codigo}")
@@ -277,7 +338,7 @@ def ventana_modificar_stock_multiple():
             messagebox.showwarning("Advertencia", "Ingrese una cantidad mayor a 0")
             return
 
-        productos.append((codigo, cantidad))
+        productos.append((codigo, cantidad)) #tupla (codigo, cantidad)
         entry_codigo.delete(0, END)
         entry_cantidad.delete(0, END)
 
