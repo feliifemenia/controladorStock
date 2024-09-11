@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Código</title>
+    <link rel="stylesheet" href="../styles/eliminarProducto.css">
+</head>
+<body>
+
+    <div class="container">
+        <form id="codigo-form">
+            <label for="codigo">Código de Producto a Eliminar:</label>
+            <input type="text" id="codigo-a-eliminar" name="codigo" placeholder="Ingrese el código" required>
+            <button type="submit">Enviar</button>
+            <p class="producto-eliminado" style="display: none;">El producto se elimino Correctamente</p>
+        </form>
+    </div>
+
+    <div id="datosProducto" style="display: none;" class="container">
+        <h2>Quiere eliminar el producto?</h2>
+        <h3 id="nombreProducto"></h3>
+        <p id="descripcionProducto"></p>
+        <button id="btnConfirmar">Confirmar</button>
+        <button id="btnRechazar">Rechazar</button>
+    </div>
+    
+    <script src="../scripts/eliminarProducto.js"></script>
+</body>
+</html>

@@ -1,11 +1,38 @@
-#mensaje {
-    display: none;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 5px;
-    z-index: 1000;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.navbar {
+    background-color: #333; /* Fondo oscuro */
+    padding: 1rem; /* Espaciado */
+    position: sticky; /* Mantener la barra visible al hacer scroll */
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.nav-list {
+    list-style-type: none;
+    display: flex; /* Hacer que los elementos de la lista estén alineados horizontalmente */
+    justify-content: space-around; /* Espaciado entre los enlaces */
+}
+
+.nav-item a {
+    color: white; /* Color del texto de los enlaces */
+    text-decoration: none; /* Quitar subrayado de los enlaces */
+    padding: 0.5rem 1rem; /* Espaciado interno de los enlaces */
+    font-size: 1.2rem; /* Tamaño del texto */
+    transition: background-color 0.3s ease; /* Animación suave al pasar el mouse */
+}
+
+.nav-item a:hover {
+    background-color: #555; /* Cambiar el color de fondo al pasar el mouse */
+    border-radius: 5px; /* Bordes redondeados en el efecto hover */
+}
+

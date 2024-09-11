@@ -24,22 +24,49 @@ app.post("/consultar-producto", async (req, res) =>{
 
     const connection = await database.getConnection();
 
-    const id = 1;
+    //Primero verifico que todos los codigos que se envian en el array esten creados en la base de datos. 
 
-    const result = await connection.query(`SELECT * FROM productos WHERE id = ?` , [id]);
+    try {
+        arrayDeCodigos.forEach(async codigo => {
+            const insertQuery = `SELECT EXISTS (
+                                    SELECT 1
+                                    FROM productos
+                                    WHERE codigoProducto = ?
+                                );`
 
-    const {id2, nombre, descripcion, codigoProducto, cantidad, codigoUnidadBase, cantidadUnidad} = result[0];
+            const result = await connection.query(insertQuery, codigo);
+        })
+    } 
+    catch (error) {
+        console.log(error);
+    }
 
-    connection.release();
+    //Ahora actualizo la base de datos con el nuevo pedido. 
 
-    res.status(200).json({ message: 'Consulta exitosa' });
+    try {
+        arrayDeCodigos.forEach(async codigo => {
+            const insertQuery = `SELECT codigoUnidadBase, cantidadUnidad FROM productos WHERE codigoProducto = ?`;
+            const result = await connection.query(insertQuery, codigo);
+    
+            const {codigoUnidadBase, cantidadUnidad} = result[0];
+            
+            const insertQueryUnidad = `UPDATE productos SET cantidad = cantidad - ${cantidadUnidad} WHERE codigoProducto = ?`;
+            const result_unidad = await connection.query(insertQueryUnidad, codigoUnidadBase);
+    
+            const insertQueryProducto = `UPDATE productos SET cantidad = cantidad - 1 WHERE codigoProducto = ?`;
+            const result_producto = await connection.query(insertQueryProducto, codigo);
+            
+            res.status(200).json({ message: 'Consulta exitosa' });
+        })
+    } catch (error) {
+        console.log(error);
+    }
+    
 })
 
 app.post("/cargar-nuevo-producto", async (req, res)=>{
     
     const formData = req.body;
-
-    console.log(formData);
 
     const {nombre_producto, descripcion_producto, codigo_producto, cantidad_producto, codigo_unidad_producto, cantidad_unidad_producto} = formData;
 
@@ -96,3 +123,45 @@ app.post("/cargar-nuevo-producto", async (req, res)=>{
     }
 })
 
+app.post("/informacion-producto", async (req, res) =>{
+    const {codigo} = req.body;
+
+    try {
+        const insertQuery = `SELECT nombre, descripcion FROM productos WHERE codigoProducto = ?`;
+
+        const connection = await database.getConnection();
+
+        const result = await connection.query(insertQuery, [codigo]);
+
+        if(result.length === 0){
+            return res.status(400).json({ message: "El código de unidad base no existe." });
+        }
+
+        const productData = {
+            nombre : result[0].nombre,
+            descripcion: result[0].descripcion 
+        }
+        console.log(productData);
+        res.json(productData);
+    } 
+    catch (error) {
+        console.log(error);
+    }
+})
+
+app.post("/eliminar-producto", async (req, res)=>{
+    const {codigoAEliminar} = req.body;
+
+    try {
+        const insertQuery = `DELETE FROM productos WHERE codigoProducto = ?`;
+        
+        const connection = await database.getConnection();
+
+        const result = connection.query(insertQuery, [codigoAEliminar]);
+
+        res.status(200).json({ message: "Producto Eliminado correctamente." });
+    } 
+    catch (error) {
+        console.log(error);
+    }
+})

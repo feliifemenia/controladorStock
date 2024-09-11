@@ -34,8 +34,6 @@ async function cargar_nuevo_producto(formData) {
     try{
         const jsonData = JSON.stringify(formData);
 
-        console.log("hola")
-
         const response = await fetch("http://localhost:4000/cargar-nuevo-producto", {
             method: 'POST',
             headers: {

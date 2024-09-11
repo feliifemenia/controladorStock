@@ -1,0 +1,118 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+label {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+#datosProducto {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.producto-eliminado{
+    color: white;
+    background-color: #28a745;
+    margin-top: 10px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 4px;
+}
+
+/* Título del producto */
+#datosProducto h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Descripción del producto */
+#datosProducto p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Estilo para los botones */
+#datosProducto button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#btnConfirmar {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+}
+
+#btnConfirmar:hover {
+    background-color: #45a049;
+}
+
+#btnRechazar {
+    background-color: #f44336; /* Rojo */
+    color: white;
+}
+
+#btnRechazar:hover {
+    background-color: #d32f2f;
+}
+
